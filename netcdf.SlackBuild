@@ -19,14 +19,14 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: netcdf.SlackBuild,v 1.2 2016/10/02 20:15:52 gsotirov Exp $
+# $Id: netcdf.SlackBuild,v 1.3 2016/10/02 20:57:02 gsotirov Exp $
 #
 
 . ../../slack-package.conf
 
 NAME=netcdf
-VERSION=4.3.3.1
-ARCH=${ARCH:-i486}
+VERSION=4.4.1
+ARCH=${ARCH:-i586}
 BUILD=${BUILD:-1}
 
 TMP=${TMP:-/tmp}
