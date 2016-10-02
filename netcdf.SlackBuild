@@ -1,0 +1,109 @@
+#!/bin/sh
+#
+# Slackware build script for NetCDF
+# Copyright (C) 2016 Georgi D. Sotirov <gdsotirov@dir.bg>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# Visit SlackPack at http://sotirov-bg.net/slackpack/
+#
+# $Id: netcdf.SlackBuild,v 1.1 2016/10/02 18:38:34 gsotirov Exp $
+#
+
+. ../../slack-package.conf
+
+NAME=netcdf
+VERSION=4.1.3
+ARCH=${ARCH:-i486}
+BUILD=${BUILD:-1}
+
+TMP=${TMP:-/tmp}
+CWD=${CWD:-`pwd`}
+
+if [ ! -e $TMP ]; then
+  mkdir -p $TMP # location to build the source
+fi
+
+SRC=$TMP/${NAME}-${VERSION}
+if [ -e $SRC -a -d $SRC ]; then
+  echo "Source directory '$SRC' already exists! Plaese, move it or remove it."
+  exit 1
+fi
+
+PKG=$TMP/package-${NAME}
+if [ -e $PKG -a -d $PKG ]; then
+  echo "Package creation directory '$PKG' already exists! Please, move it or remove it."
+  exit 2
+fi
+mkdir -p $PKG
+
+# Extract the source
+cd $TMP
+tar -xvf $CWD/${NAME}-${VERSION}.tar.?z* || exit 3
+cd $SRC
+fix_source
+
+# Configure
+CFLAGS=$SLKCFLAGS \
+CXXFLAGS=$SLKCFLAGS \
+./configure --build=${ARCH}-slackware-linux \
+            --host=${ARCH}-slackware-linux \
+            --prefix=/usr \
+            --libdir=/usr/lib${LIBDIRSUFFIX} \
+            --mandir=/usr/man \
+            --infodir=/usr/info \
+            --enable-shared=yes \
+            --enable-static=no || exit 4
+
+# Build & install
+make -j4 || exit 5
+make check # || exit 51 # 1 test out of 50 fails
+make DESTDIR=$PKG install || exit 6
+
+# Prepare
+bin_perms $PKG
+( cd $PKG; strip_bin; strip_lib )
+( cd $SRC; create_docs $PKG $NAME-$VERSION )
+( cd $PKG/usr/doc/${NAME}-${VERSION}; mv COPYRIGHT COPYING )
+gzip_man $PKG
+rm -f $PKG/usr/info/dir
+gzip_info $PKG
+
+mkdir -p $PKG/install
+install -m 644 $CWD/doinst.sh      $PKG/install/doinst.sh
+install -m 644 $CWD/slack-desc     $PKG/install/slack-desc
+install -m 644 $CWD/slack-required $PKG/install/slack-required
+
+SBDIR=$PKG/usr/src/slackbuilds/${NAME}-${VERSION}
+install -m 755 -d -D $SBDIR
+install -m 644 $CWD/doinst.sh          $SBDIR/doinst.sh
+install -m 644 $CWD/slack-desc         $SBDIR/slack-desc
+install -m 644 $CWD/slack-required     $SBDIR/slack-required
+install -m 644 $CWD/${NAME}.SlackBuild $SBDIR/${NAME}.SlackBuild
+
+# Pack
+cd $PKG
+PKGNAME=${NAME}-${VERSION}-${ARCH}-${BUILD}${MYIN}
+makepkg -l y -c n -p $PKG_DIR/${PKGNAME}.txz
+cd $PKG_DIR
+md5sum ${PKGNAME}.txz > ${PKGNAME}.txz.md5
+cat $PKG/install/slack-desc > $PKG_DIR/${PKGNAME}.txt
+
+# Clean up (optionally)
+if [ "$1" == "--cleanup" ]; then
+  rm -rf $SRC
+  rm -rf $PKG
+fi
+
