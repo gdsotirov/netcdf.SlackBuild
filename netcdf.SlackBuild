@@ -19,13 +19,13 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: netcdf.SlackBuild,v 1.1 2016/10/02 18:38:34 gsotirov Exp $
+# $Id: netcdf.SlackBuild,v 1.2 2016/10/02 20:15:52 gsotirov Exp $
 #
 
 . ../../slack-package.conf
 
 NAME=netcdf
-VERSION=4.1.3
+VERSION=4.3.3.1
 ARCH=${ARCH:-i486}
 BUILD=${BUILD:-1}
 
@@ -69,26 +69,22 @@ CXXFLAGS=$SLKCFLAGS \
 
 # Build & install
 make -j4 || exit 5
-make check # || exit 51 # 1 test out of 50 fails
+make check  || exit 51
 make DESTDIR=$PKG install || exit 6
 
 # Prepare
 bin_perms $PKG
 ( cd $PKG; strip_bin; strip_lib )
 ( cd $SRC; create_docs $PKG $NAME-$VERSION )
-( cd $PKG/usr/doc/${NAME}-${VERSION}; mv COPYRIGHT COPYING )
+( cd $PKG/usr/doc/${NAME}-${VERSION}; mv COPYRIGHT COPYING; mv README.md README )
 gzip_man $PKG
-rm -f $PKG/usr/info/dir
-gzip_info $PKG
 
 mkdir -p $PKG/install
-install -m 644 $CWD/doinst.sh      $PKG/install/doinst.sh
 install -m 644 $CWD/slack-desc     $PKG/install/slack-desc
 install -m 644 $CWD/slack-required $PKG/install/slack-required
 
 SBDIR=$PKG/usr/src/slackbuilds/${NAME}-${VERSION}
 install -m 755 -d -D $SBDIR
-install -m 644 $CWD/doinst.sh          $SBDIR/doinst.sh
 install -m 644 $CWD/slack-desc         $SBDIR/slack-desc
 install -m 644 $CWD/slack-required     $SBDIR/slack-required
 install -m 644 $CWD/${NAME}.SlackBuild $SBDIR/${NAME}.SlackBuild
