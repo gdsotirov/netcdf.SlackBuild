@@ -1,0 +1,11 @@
+curl >= 7.27.0
+cxxlibs >= 6.0.17 | gcc-g++ >= 4.7.1
+cyrus-sasl >= 2.1.23
+gcc >= 4.7.1
+gcc-gfortran >= 4.7.1
+glibc-solibs >= 2.15
+hdf5 >= 1.8.11
+libidn >= 1.25
+openldap >= 2.4.31 | openldap-client >= 2.4.31
+openssl >= 1.0.1c | openssl-solibs >= 1.0.1c
+zlib >= 1.2.6
